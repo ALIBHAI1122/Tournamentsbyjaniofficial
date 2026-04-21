@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JANI OFFICIAL TOURNAMENTS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #ff003c; --secondary: #00f2ff; --bg: #07090f; --card: #121620; --gold: #f1c40f; }
+        body, html { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: white; overflow-x: hidden; }
+
+        /* Rule 1: Splash Screen */
+        #splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 10000; }
+        .ff-logo { width: 120px; margin-bottom: 20px; filter: drop-shadow(0 0 10px var(--primary)); }
+        .g-box { background: linear-gradient(135deg, #bf953f, #fcf6ba, #b38728); color: #000; padding: 12px 25px; border-radius: 8px; font-weight: 800; border: 2px solid #fff; box-shadow: 0 0 15px var(--gold); }
+        .l-cont { width: 70%; height: 8px; background: #222; border-radius: 10px; margin-top: 40px; position: relative; }
+        .l-bar { width: 0%; height: 100%; background: var(--gold); border-radius: 10px; }
+        .l-jet { position: absolute; top: -20px; left: 0%; transform: translateX(-50%); color: var(--gold); font-size: 20px; transition: 0.1s linear; }
+
+        /* Rule 6 & 7: VIP Trading & WhatsApp */
+        .trade-box { background: linear-gradient(135deg, #f1c40f, #fff176, #f1c40f); color: #000; padding: 15px; border-radius: 12px; text-align: center; font-weight: 800; margin: 15px; border: 2px solid #fff; }
+        .wa-btn { display: inline-block; background: #25d366; color: white; padding: 4px 10px; border-radius: 5px; font-size: 11px; text-decoration: none; margin: 5px; font-weight: 600; }
+
+        header { background: var(--card); padding: 15px; border-bottom: 2px solid var(--primary); text-align: center; position: sticky; top: 0; z-index: 100; }
+        .bal-display { color: var(--gold); font-size: 20px; font-weight: 800; margin: 10px 0; }
+        
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+        .btn-p { background: var(--primary); color: white; }
+        .btn-d { background: #1a1a1a !important; color: #444 !important; border: 1px dashed #333; cursor: not-allowed; }
+        .btn-a { background: #2ecc71 !important; color: white; cursor: not-allowed; }
+
+        /* Rule 23: Winning Announcement Notice */
+        #win-announcement { display: none; background: linear-gradient(to right, #ff003c, #990024); color: white; padding: 15px; text-align: center; font-weight: 800; animation: flash 1s infinite alternate; cursor: pointer; margin: 10px; border-radius: 10px; }
+        @keyframes flash { from { opacity: 1; } to { opacity: 0.7; } }
+
+        /* Rule 21: Admin Reply */
+        #admin-reply { display: none; background: #1a1e2e; border: 1px solid var(--gold); padding: 12px; border-radius: 10px; margin: 10px 15px; }
+
+        input, select { width: 100%; padding: 12px; margin: 8px 0; background: #000; border: 1px solid #333; color: white; border-radius: 6px; box-sizing: border-box; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; align-items: center; justify-content: center; padding: 15px; }
+        .m-cont { background: var(--card); width: 100%; max-width: 400px; padding: 25px; border-radius: 15px; border: 1px solid #444; position: relative; }
+    </style>
+</head>
+<body>
+
+    <div id="splash">
+        <img src="https://img.icons8.com/color/512/free-fire.png" class="ff-logo">
+        <div class="g-box">TOURNAMENTS BY JANI OFFICIAL</div>
+        <div class="l-cont">
+            <div class="l-jet" id="jet"><i class="fas fa-fighter-jet"></i></div>
+            <div class="l-bar" id="bar"></div>
+        </div>
+    </div>
+
+    <div id="main-content" style="display:none;">
+        <div id="auth-screen" style="display:none; padding:100px 20px;">
+            <div class="m-cont" style="margin:auto; text-align:center;">
+                <h2 style="color:var(--gold)">SIGN IN</h2>
+                <input type="text" id="u-name" placeholder="Enter Username">
+                <input type="password" id="u-pass" placeholder="Enter Password">
+                <button class="btn btn-p" onclick="handleAuth()">ENTER SYSTEM</button>
+            </div>
+        </div>
+
+        <div id="app-screen" style="display:none;">
+            <header>
+                <div id="user-display" style="color:var(--secondary); font-size:12px; font-weight:800;">PLAYER</div>
+                <div class="bal-display">PKR <span id="balance-val">0</span></div>
+                <div style="display:flex; gap:8px; justify-content:center;">
+                    <button class="btn" style="width:auto; padding:5px 15px; background:var(--gold); color:#000;" onclick="openModal('dep-m')">DEPOSIT</button>
+                    <button class="btn" style="width:auto; padding:5px 15px; background:white; color:#000;" onclick="openDash()">DASHBOARD</button>
+                    <button class="btn" style="width:auto; padding:5px 15px; background:red; color:white;" onclick="logout()">LOGOUT</button>
+                </div>
+            </header>
+
+            <div class="trade-box">
+                <p>CONTACT US FOR BUY & SALE FREE FIRE ACCOUNT</p>
+                <div style="margin-top: 10px;">
+                    0307-8679225 (JANI OFFICIAL FF DEALER) <a href="https://wa.me/923078679225" class="wa-btn"><i class="fab fa-whatsapp"></i> Chat</a><br>
+                    0316-6190180 (JANI OFFICIAL 2ND) <a href="https://wa.me/923166190180" class="wa-btn"><i class="fab fa-whatsapp"></i> Chat</a>
+                </div>
+            </div>
+
+            <div id="win-announcement" onclick="openModal('win-m')">
+                🏆 MATCH ENDED! CONGRATIONS TO WINNER , ONLY WINNER CLICK HERE & SEND PROVE 🏆
+            </div>
+
+            <div id="admin-reply">
+                <div style="display:flex; justify-content:space-between;"><small style="color:var(--gold)">ADMIN REPLY:</small><button onclick="clearReply()" style="background:none; border:none; color:red; font-weight:800; cursor:pointer;">X</button></div>
+                <p id="reply-text" style="margin:5px 0; font-size:13px;"></p>
+            </div>
+
+            <div id="room-info" style="display:none; background:#1a1e2e; border:2px dashed var(--secondary); padding:15px; border-radius:10px; margin:10px 15px; text-align:center;">
+                <h4 style="margin:0; color:var(--secondary)">ROOM ID & PASSWORD</h4>
+                <p id="room-text" style="font-weight:bold; margin:5px 0; color:var(--gold)"></p>
+            </div>
+
+            <div style="padding:15px;">
+    <div style="background:var(--card); padding:15px; border-radius:12px; margin-bottom:15px; border-left:5px solid var(--primary);">
+        <h3 style="margin:0">SOLO BATTLE</h3>
+        <p style="margin: 5px 0; font-size: 13px; color: var(--gold);">Entry Fee: 50 | <b>Win Prize: 300</b></p>
+        <button id="btn-solo" class="btn btn-p" onclick="openJoin('Solo', 50)">JOIN MATCH</button>
+    </div>
+
+    <div style="background:var(--card); padding:15px; border-radius:12px; margin-bottom:15px; border-left:5px solid var(--primary);">
+        <h3 style="margin:0">SQUAD WAR</h3>
+        <p style="margin: 5px 0; font-size: 13px; color: var(--gold);">Entry Fee: 200 | <b>Win Prize: 1200</b></p>
+        <button id="btn-squad" class="btn btn-p" onclick="openJoin('Squad', 200)">JOIN MATCH</button>
+    </div>
+</div style="background:#1a1e2e; padding:15px; border-radius:12px; margin-top:20px;">
+                    <h4 style="margin-top:0">HELP CENTER</h4>
+                    <input type="text" id="h-input" placeholder="Type your problem...">
+                    <button class="btn btn-p" onclick="sendHelp()">SEND TO ADMIN</button>
+ <style>
+    .modal {
+        display: none; /* Default hidden */
+        position: fixed;
+        z-index: 9999;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.8);
+    }
+    .m-cont {
+        background: #222;
+        margin: 15% auto;
+        padding: 20px;
+        width: 85%;
+        max-width: 400px;
+        border-radius: 15px;
+        color: white;
+    }
+    .modal input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        background: #333;
+        border: 1px solid #444;
+        color: white;
+        border-radius: 5px;
+    }
+</style>
+
+<div id="dep-m" class="modal">
+    <div class="m-cont" style="text-align: center;">
+        <h3 style="margin-bottom:10px;">DEPOSIT PROOF</h3>
+        <div style="background: #1a1a1a; border: 1px solid var(--gold); padding: 12px; border-radius: 10px; margin-bottom: 20px;">
+            <p style="margin: 0; color: var(--gold); font-weight: 800; font-size: 14px;">📢 SEND PAYMENT ON:</p>
+            <p style="margin: 5px 0; font-size: 18px; font-weight: 700; color: #fff;">03078679225</p>
+            <p style="margin: 0; font-size: 12px; opacity: 0.9;">(Muhammad Jamil - EasyPaisa)</p>
+        </div>
+        <input type="number" id="d-amt" placeholder="Amount Sent">
+        <input type="text" id="d-num" placeholder="Sender Account Number">
+        <p style="font-size:11px; color:var(--gold); margin: 15px 0 5px 0; text-align: left;">Upload Payment Screenshot:</p>
+        <input type="file" id="d-file" accept="image/*">
+
+        <button class="btn btn-p" style="margin-top:10px; width:100%;" onclick="submitDep()">SUBMIT DEPOSIT</button>
+        <button class="btn" style="margin-top:10px; width:100%; background: #333; color: white;" onclick="closeModal()">CANCEL</button>
+    </div>
+</div>
+
+<script>
+    function openModal() {
+        document.getElementById('dep-m').style.display = 'block';
+    }
+    function closeModal() {
+        document.getElementById('dep-m').style.display = 'none';
+    }
+    // Background click par band karne ke liye
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('dep-m')) {
+            closeModal();
+        }
+    }
+</script>
+
+    <div id="win-m" class="modal"><div class="m-cont">
+        <h3>JUST WINNER CLAIM THIS PRIZE</h3>
+        <select id="w-meth"><option value="JazzCash">JazzCash</option><option value="EasyPaisa">EasyPaisa</option></select>
+        <input type="text" id="w-name" placeholder="Account Holder Name">
+        <input type="text" id="w-acc" placeholder="Account Number">
+        <p style="font-size:10px; color:var(--gold);">Upload Booyah/Winning Screenshot</p>
+        <input type="file" id="w-ss" accept="image/*">
+        <button class="btn btn-p" onclick="submitWin()">SUBMIT TO ADMIN & WAIT FOR APPROVAL</button>
+        <button class="btn" style="margin-top:10px" onclick="closeModal()">CLOSE</button>
+    </div></div>
+
+    <div id="join-m" class="modal"><div class="m-cont">
+        <h3 id="jt">JOIN MATCH</h3><div id="jf"></div>
+        <button class="btn btn-p" onclick="confirmJoin()">CONFIRM JOIN</button>
+        <button class="btn" style="margin-top:10px" onclick="closeModal()">CANCEL</button>
+    </div></div>
+
+    <div id="dash-m" class="modal"><div class="m-cont" style="max-height:70vh; overflow-y:auto;">
+        <h3>DASHBOARD HISTORY</h3>
+        <div id="dash-list"></div>
+        <button class="btn btn-p" style="margin-top:15px" onclick="closeModal()">CLOSE</button>
+    </div></div>
+
+    <script>
+        let curr = JSON.parse(localStorage.getItem('jani_session')) || null;
+        let db = JSON.parse(localStorage.getItem('jani_users_db')) || [];
+        let tJoin = null;
+
+        // Rule 1 & 2: Splash Logic
+        window.onload = () => {
+            let p = 0;
+            let i = setInterval(() => {
+                p += 2;
+                document.getElementById('bar').style.width = p+'%';
+                document.getElementById('jet').style.left = p+'%';
+                if(p >= 100){
+                    clearInterval(i);
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('main-content').style.display = 'block';
+                    if(curr) start(); else document.getElementById('auth-screen').style.display = 'block';
+                }
+            }, 60);
+        };
+
+        async function to64(f) { return new Promise((res) => { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => res(r.result); }); }
+
+        // Rule 5: Identity Check
+        function handleAuth() {
+            let u = document.getElementById('u-name').value.trim();
+            let p = document.getElementById('u-pass').value.trim();
+            if(!u || !p) return alert("Fill all!");
+            let user = db.find(x => x.username.toLowerCase() === u.toLowerCase());
+            if(user) {
+                if(user.pass === p) { curr = user; localStorage.setItem('jani_session', JSON.stringify(user)); start(); }
+                else alert("Username Already Exists!");
+            } else {
+                let n = { username: u, pass: p, balance: 0, requests: [] };
+                db.push(n); curr = n; save(); start();
+            }
+        }
+
+        function start() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+            sync();
+        }
+
+        // Rule 3, 12, 18, 21, 23: Combined Real-time Logic
+        function sync() {
+            db = JSON.parse(localStorage.getItem('jani_users_db')) || [];
+            curr = db.find(x => x.username === curr.username);
+            document.getElementById('user-display').innerText = curr.username.toUpperCase();
+            document.getElementById('balance-val').innerText = curr.balance;
+
+            // Rule 23: Winning Notice (Targetted for Approved Users Only)
+            let isApproved = curr.requests.find(r => (r.type==='Solo' || r.type==='Squad') && r.status==='Approved');
+            let matchEnded = localStorage.getItem('jani_ended') === 'true';
+            document.getElementById('win-announcement').style.display = (matchEnded && isApproved) ? 'block' : 'none';
+
+            // Rule 21: Admin Reply
+            let reps = JSON.parse(localStorage.getItem('jani_replies')) || {};
+            if(reps[curr.username]) {
+                document.getElementById('admin-reply').style.display = 'block';
+                document.getElementById('reply-text').innerText = reps[curr.username];
+            } else document.getElementById('admin-reply').style.display = 'none';
+
+            // Rule 18: Room ID (Only for Approved)
+            let room = JSON.parse(localStorage.getItem('jani_room'));
+            if(room && isApproved) {
+                document.getElementById('room-info').style.display = 'block';
+                document.getElementById('room-text').innerText = room.text;
+            } else document.getElementById('room-info').style.display = 'none';
+
+            // Rule 12: Dismissed Lock Logic
+            let activeJoin = curr.requests.find(r => (r.type==='Solo' || r.type==='Squad') && r.status!=='Rejected');
+            ['solo','squad'].forEach(m => {
+                let btn = document.getElementById('btn-'+m);
+                if(activeJoin) {
+                    if(activeJoin.type.toLowerCase() === m) {
+                        btn.innerText = activeJoin.status;
+                        btn.className = activeJoin.status === 'Approved' ? "btn btn-a" : "btn btn-p";
+                        btn.disabled = true;
+                    } else { btn.innerText = "DISMISSED"; btn.className = "btn btn-d"; btn.disabled = true; }
+                } else { btn.innerText = "JOIN MATCH"; btn.className = "btn btn-p"; btn.disabled = false; }
+            });
+        }
+
+        // Rule 8-10: Deposit with Auto-Reset
+        async function submitDep() {
+            let a = document.getElementById('d-amt').value, n = document.getElementById('d-num').value, f = document.getElementById('d-file').files[0];
+            if(!a || !n || !f) return alert("Fill all details!");
+            let img = await to64(f);
+            curr.requests.push({ type:'Deposit', amt:a, num:n, proof:img, status:'Pending' });
+            document.getElementById('d-amt').value=""; document.getElementById('d-num').value=""; document.getElementById('d-file').value="";
+            save(); closeModal(); alert("Deposit Sent!");
+        }
+
+        // Rule 13-14: Join Match with Auto-Reset
+        function openJoin(t, f) {
+            if(curr.balance < f) return alert("Low Balance!");
+            tJoin = { t, f };
+            document.getElementById('jt').innerText = "JOIN " + t;
+            let fields = document.getElementById('jf'); fields.innerHTML = "";
+            let count = t === 'Solo' ? 1 : 4;
+            for(let i=1; i<=count; i++) fields.innerHTML += `<input type="text" class="jn" placeholder="P${i} Name"><input type="text" class="ju" placeholder="P${i} UID">`;
+            openModal('join-m');
+        }
+
+        function confirmJoin() {
+            let ns = Array.from(document.querySelectorAll('.jn')).map(i => i.value);
+            let us = Array.from(document.querySelectorAll('.ju')).map(i => i.value);
+            if(ns.some(n => !n) || us.some(u => !u)) return alert("Fill all player info!");
+            curr.balance -= tJoin.f;
+            curr.requests.push({ type: tJoin.t, details: ns.map((n,i) => n+" (ID:"+us[i]+")").join(", "), status: 'Pending' });
+            save(); closeModal(); alert("Joined!");
+        }
+
+        // Rule 23 & 15-17: Winner Claim with Auto-Reset
+        async function submitWin() {
+            let m = document.getElementById('w-meth').value, n = document.getElementById('w-name').value, a = document.getElementById('w-acc').value, f = document.getElementById('w-ss').files[0];
+            if(!n || !a || !f) return alert("Fill all!");
+            let img = await to64(f);
+            curr.requests.push({ type: 'Win Claim', details: `${m} | ${n} | ${a}`, proof: img, status: 'Pending' });
+            document.getElementById('w-name').value=""; document.getElementById('w-acc').value=""; document.getElementById('w-ss').value="";
+            save(); closeModal(); alert("Claim Submitted!");
+        }
+
+        // Rule 22: Dashboard Tracker
+        function openDash() {
+            let list = document.getElementById('dash-list'); list.innerHTML = "";
+            curr.requests.slice().reverse().forEach(r => {
+                let color = r.status === 'Approved' ? '#2ecc71' : (r.status === 'Rejected' ? '#e74c3c' : '#f1c40f');
+                list.innerHTML += `<div style="background:#000; padding:10px; margin-bottom:8px; border-left:4px solid ${color}; font-size:11px;">
+                    <b style="color:${color}">${r.type} [${r.status}]</b><br>${r.amt ? 'PKR '+r.amt+' from '+r.num : r.details}</div>`;
+            });
+            openModal('dash-m');
+        }
+
+        function sendHelp() {
+            let m = document.getElementById('h-input').value; if(!m) return;
+            let help = JSON.parse(localStorage.getItem('jani_help')) || [];
+            help.push({ user: curr.username, text: m });
+            localStorage.setItem('jani_help', JSON.stringify(help));
+            document.getElementById('h-input').value = ""; alert("Message Sent!");
+        }
+
+        function clearReply() {
+            let reps = JSON.parse(localStorage.getItem('jani_replies')) || {};
+            delete reps[curr.username]; localStorage.setItem('jani_replies', JSON.stringify(reps)); sync();
+        }
+
+        function save() {
+            let idx = db.findIndex(x => x.username === curr.username);
+            db[idx] = curr; localStorage.setItem('jani_users_db', JSON.stringify(db));
+            localStorage.setItem('jani_session', JSON.stringify(curr));
+            sync();
+        }
+
+        function logout() { localStorage.removeItem('jani_session'); location.reload(); }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+        setInterval(sync, 4000); 
+    </script>
+</body>
+</html>

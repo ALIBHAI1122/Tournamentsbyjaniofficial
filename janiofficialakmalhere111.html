@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JANI OFFICIAL - MASTER ADMIN PANEL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #ff003c; --gold: #f1c40f; --bg: #07090f; --card: #121620; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: white; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; }
+        h2, h3 { color: var(--gold); text-align: center; text-transform: uppercase; }
+        
+        .section { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+        
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 12px; }
+        th, td { border: 1px solid #222; padding: 12px; text-align: left; }
+        th { background: #1a1e2e; color: var(--gold); }
+        
+        /* Rule 19: Image Preview */
+        .ss-view { width: 60px; height: 60px; object-fit: cover; border: 2px solid var(--gold); cursor: pointer; border-radius: 5px; transition: 0.3s; }
+        .ss-view:hover { transform: scale(1.1); }
+
+        /* Buttons */
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 11px; text-transform: uppercase; margin: 2px; }
+        .btn-app { background: #2ecc71; color: white; }
+        .btn-rej { background: #e74c3c; color: white; }
+        .btn-gold { background: var(--gold); color: black; }
+        .btn-reset { background: var(--primary); color: white; width: 100%; margin-top: 15px; font-size: 14px; padding: 15px; }
+
+        /* Zoom Modal */
+        #zoom-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; justify-content: center; align-items: center; flex-direction: column; }
+        #zoom-img { max-width: 90%; max-height: 80%; border: 3px solid var(--gold); }
+
+        .chat-card { background: #0a0c14; padding: 12px; border-left: 4px solid var(--gold); margin-bottom: 10px; border-radius: 5px; }
+        input, select { background: #000; border: 1px solid #444; color: white; padding: 8px; border-radius: 4px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2><i class="fas fa-crown"></i> JANI OFFICIAL ADMIN</h2>
+
+    <div class="section">
+        <h3><i class="fas fa-tools"></i> Match Controls</h3>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn btn-gold" onclick="setRoom()">SET ROOM ID / PASS (Rule 18)</button>
+            <button class="btn btn-app" onclick="toggleMatch(true)">END MATCH (ON Rule 23)</button>
+            <button class="btn btn-rej" onclick="toggleMatch(false)">END MATCH (OFF)</button>
+        </div>
+        <button class="btn btn-reset" onclick="globalReset()">🚀 START NEW MATCH (Rule 20 Reset)</button>
+    </div>
+
+    <div class="section">
+        <h3><i class="fas fa-list-check"></i> Pending Requests (Deposits / Joins / Wins)</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Type</th>
+                        <th>Details / Amount</th>
+                        <th>Screenshot (Click to Zoom)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="req-table"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fas fa-headset"></i> Help Center Messages</h3>
+        <div id="help-list"></div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fas fa-users"></i> User Management</h3>
+        <button class="btn btn-gold" onclick="toggleUsers()">View / Hide All Users</button>
+        <div id="user-sec" style="display:none; overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr><th>Username</th><th>Password</th><th>Balance</th><th>Update</th></tr>
+                </thead>
+                <tbody id="user-table"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="zoom-modal" onclick="this.style.display='none'">
+    <img id="zoom-img" src="">
+    <p style="margin-top:15px; font-weight:bold;">CLICK ANYWHERE TO CLOSE</p>
+</div>
+
+<script>
+        function renderAdmin() {
+        const users = JSON.parse(localStorage.getItem('jani_users_db')) || [];
+        const reqTable = document.getElementById('req-table');
+        const userTable = document.getElementById('user-table');
+        const helpList = document.getElementById('help-list');
+
+        reqTable.innerHTML = "";
+        userTable.innerHTML = "";
+        helpList.innerHTML = "";
+
+        users.forEach(u => {
+            u.requests.forEach((r, idx) => {
+                // Yahan se 'if pending' wali condition khatam kar di hai
+                let detail = r.amt ? `PKR ${r.amt} (From: ${r.num})` : r.details;
+                let ss = r.proof ? `<img src="${r.proof}" class="ss-view" onclick="zoom('${r.proof}')">` : 'No SS';
+                
+                // Status ke mutabiq color aur buttons ka faisla
+                let statusColor = r.status === 'Approved' ? '#2ecc71' : (r.status === 'Rejected' ? '#e74c3c' : '#f1c40f');
+                
+                let actionArea = "";
+                if(r.status === 'Pending') {
+                    actionArea = `
+                        <button class="btn btn-app" onclick="action('${u.username}', ${idx}, 'Approved')">Approve</button>
+                        <button class="btn btn-rej" onclick="action('${u.username}', ${idx}, 'Rejected')">Reject</button>
+                    `;
+                } else {
+                    // Approved hone ke baad Green mark ke sath text show hoga
+                    actionArea = `<b style="color:${statusColor}; border:1px solid ${statusColor}; padding:2px 5px; border-radius:3px;">
+                        <i class="fas fa-check"></i> ${r.status.toUpperCase()}
+                    </b>`;
+                }
+
+                reqTable.innerHTML += `<tr>
+                    <td><b>${u.username}</b></td>
+                    <td>${r.type}</td>
+                    <td>${detail}</td>
+                    <td>${ss}</td>
+                    <td>${actionArea}</td>
+                </tr>`;
+            });
+
+            userTable.innerHTML += `<tr>
+                <td>${u.username}</td>
+                <td>${u.pass}</td>
+                <td><b>PKR ${u.balance}</b></td>
+                <td>
+                    <input type="number" id="bal-${u.username}" placeholder="New Bal" style="width:70px">
+                    <button class="btn btn-gold" onclick="setBal('${u.username}')">Set</button>
+                </td>
+            </tr>`;
+        });
+
+        // Table ke neeche CLEAR button add karna agar table khali na ho
+        if (reqTable.innerHTML !== "") {
+            reqTable.innerHTML += `<tr><td colspan="5" style="text-align:center; background:#1a1e2e;">
+                <button class="btn btn-gold" style="width:280px; font-size:13px;" onclick="clearApprovedOnly()">
+                    🗑️ CLEAR APPROVED REQUESTS
+                </button>
+            </td></tr>`;
+        }
+
+        const chats = JSON.parse(localStorage.getItem('jani_help')) || [];
+        chats.forEach((c, i) => {
+            helpList.innerHTML += `<div class="chat-card"><b>${c.user}:</b> ${c.text} <br>
+                <input type="text" id="rep-${i}" placeholder="Reply..." style="width:60%">
+                <button class="btn btn-gold" onclick="sendReply('${c.user}', ${i})">Send</button>
+            </div>`;
+        });
+    }
+
+    // --- FUNCTIONS ---
+
+    function action(uName, idx, status) {
+        let db = JSON.parse(localStorage.getItem('jani_users_db'));
+        let user = db.find(x => x.username === uName);
+        let req = user.requests[idx];
+
+        if(status === 'Approved' && req.type === 'Deposit') {
+            user.balance = (parseFloat(user.balance) || 0) + parseFloat(req.amt);
+        }
+        req.status = status;
+        localStorage.setItem('jani_users_db', JSON.stringify(db));
+        renderAdmin();
+    }
+
+    // Yeh button dabane par hi approved requests delete hongi
+    function clearApprovedOnly() {
+        if(!confirm("Kya aap tamam Approved aur Rejected requests ko saaf karna chahte hain?")) return;
+        let db = JSON.parse(localStorage.getItem('jani_users_db')) || [];
+        db.forEach(u => {
+            u.requests = u.requests.filter(r => r.status === 'Pending');
+        });
+        localStorage.setItem('jani_users_db', JSON.stringify(db));
+        renderAdmin();
+        alert("Approved requests cleared from list!");
+    }
+
+    function setRoom() {
+        let val = prompt("Enter Room ID & Password:");
+        if(val) localStorage.setItem('jani_room', JSON.stringify({ text: val }));
+    }
+
+    function toggleMatch(bool) {
+        localStorage.setItem('jani_ended', bool);
+        alert(bool ? "Winning Box ON!" : "Match Ended OFF.");
+    }
+
+    function sendReply(uName, idx) {
+        let msg = document.getElementById(`rep-${idx}`).value;
+        if(!msg) return;
+        let reps = JSON.parse(localStorage.getItem('jani_replies')) || {};
+        reps[uName] = msg;
+        localStorage.setItem('jani_replies', JSON.stringify(reps));
+        let chats = JSON.parse(localStorage.getItem('jani_help'));
+        chats.splice(idx, 1);
+        localStorage.setItem('jani_help', JSON.stringify(chats));
+        renderAdmin();
+    }
+
+    function setBal(uName) {
+        let val = document.getElementById(`bal-${uName}`).value;
+        let db = JSON.parse(localStorage.getItem('jani_users_db'));
+        db.find(x => x.username === uName).balance = parseFloat(val);
+        localStorage.setItem('jani_users_db', JSON.stringify(db));
+        renderAdmin();
+    }
+
+    function globalReset() {
+        if(!confirm("FULL RESET? Yeh sab kuch delete kar dega!")) return;
+        let db = JSON.parse(localStorage.getItem('jani_users_db'));
+        db.forEach(u => u.requests = []);
+        localStorage.setItem('jani_users_db', JSON.stringify(db));
+        renderAdmin();
+    }
+
+    function zoom(src) {
+        document.getElementById('zoom-img').src = src;
+        document.getElementById('zoom-modal').style.display = 'flex';
+    }
+
+    function toggleUsers() {
+        let sec = document.getElementById('user-sec');
+        sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+    }
+
+    renderAdmin();
+    setInterval(renderAdmin, 5000); // 5 seconds auto-refresh
+</script>
+</body>
+</html>
+
